@@ -50,7 +50,7 @@ def init_db():
             )
         """)
         
-        init_db()
+init_db()
 
 
 # ---------------- AUTHENTICATION ----------------
@@ -422,7 +422,6 @@ def disk_api():
 
 if __name__ == "__main__":
 
-    init_db()
 
     app.run(
         host="127.0.0.1",
