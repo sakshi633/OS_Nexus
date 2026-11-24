@@ -1,0 +1,260 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile | OS Nexus</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: #0c1020;
+            color: #f4f5ff;
+            font-family: Arial, sans-serif;
+        }
+
+        .profile-container {
+            width: min(700px, 92%);
+            margin: 45px auto;
+        }
+
+        .back-link {
+            display: inline-block;
+            color: #a99aff;
+            text-decoration: none;
+            margin-bottom: 22px;
+        }
+
+        .profile-card {
+            padding: 32px;
+            border-radius: 20px;
+            background: #171c30;
+            border: 1px solid #303956;
+            box-shadow: 0 15px 45px rgba(0,0,0,.25);
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            margin-bottom: 30px;
+        }
+
+        .avatar {
+            width: 75px;
+            height: 75px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg,#8155f5,#3479ed);
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        .profile-header h1 {
+            margin: 0 0 8px;
+            font-size: 27px;
+        }
+
+        .profile-header p {
+            margin: 0;
+            color: #aab3cf;
+        }
+
+        .section-title {
+            margin-top: 28px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #343c57;
+        }
+
+        .form-group { margin-top: 19px; }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 9px;
+            color: #cbd2ed;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px;
+            border-radius: 10px;
+            border: 1px solid #3a4567;
+            outline: none;
+            background: #101529;
+            color: white;
+            font-size: 15px;
+        }
+
+        .form-group input:focus {
+            border-color: #8565f7;
+            box-shadow: 0 0 0 3px rgba(133,101,247,.12);
+        }
+
+        .hint {
+            color: #8f9ab9;
+            font-size: 13px;
+            margin-top: 8px;
+        }
+
+        .save-btn {
+            width: 100%;
+            margin-top: 28px;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(110deg,#8055f5,#3479ed);
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .save-btn:hover { opacity: .9; }
+
+        .message {
+            padding: 13px;
+            margin-bottom: 12px;
+            border-radius: 9px;
+            background: #253b35;
+            color: #9af0bf;
+        }
+
+        .message.error {
+            background: #472b36;
+            color: #ffb0bd;
+        }
+
+        .account-info {
+            margin-top: 25px;
+            padding: 17px;
+            border-radius: 12px;
+            background: #101529;
+            color: #aab3cf;
+            line-height: 1.8;
+        }
+
+        @media(max-width: 550px) {
+            .profile-card { padding: 21px; }
+            .profile-header h1 { font-size: 22px; }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="profile-container">
+
+    <a href="{{ url_for('dashboard') }}" class="back-link">
+        ← Back to Dashboard
+    </a>
+
+    <div class="profile-card">
+
+        <div class="profile-header">
+            <div class="avatar">
+                {{ user['name'][0]|upper }}
+            </div>
+
+            <div>
+                <h1>My Profile</h1>
+                <p>Manage your OS Nexus account</p>
+            </div>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="message {{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endwith %}
+
+        <form method="POST">
+
+            <h3 class="section-title">Personal Information</h3>
+
+            <div class="form-group">
+                <label>Full Name</label>
+                <input
+                    type="text"
+                    name="name"
+                    value="{{ user['name'] }}"
+                    maxlength="100"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label>Email Address</label>
+                <input
+                    type="email"
+                    name="email"
+                    value="{{ user['email'] }}"
+                    maxlength="254"
+                    required
+                >
+            </div>
+
+            <h3 class="section-title">Change Password</h3>
+
+            <p class="hint">
+                Leave all password fields empty if you don't want to change your password.
+            </p>
+
+            <div class="form-group">
+                <label>Current Password</label>
+                <input
+                    type="password"
+                    name="current_password"
+                    placeholder="Enter current password"
+                    autocomplete="current-password"
+                >
+            </div>
+
+            <div class="form-group">
+                <label>New Password</label>
+                <input
+                    type="password"
+                    name="new_password"
+                    minlength="8"
+                    placeholder="Enter new password"
+                    autocomplete="new-password"
+                >
+            </div>
+
+            <div class="form-group">
+                <label>Confirm New Password</label>
+                <input
+                    type="password"
+                    name="confirm_password"
+                    minlength="8"
+                    placeholder="Confirm new password"
+                    autocomplete="new-password"
+                >
+            </div>
+
+            <button type="submit" class="save-btn">
+                Save Profile Changes
+            </button>
+
+        </form>
+
+        <div class="account-info">
+            <strong>Account Information</strong><br>
+            User ID: {{ user['id'] }}<br>
+            Registered On: {{ user['created_at'] }}
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

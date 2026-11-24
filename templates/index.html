@@ -1,0 +1,722 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OS Nexus | Operating System Resource Manager</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        .section {
+            display: none;
+            animation: fadeIn .3s ease;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .welcome-banner {
+            padding: 27px;
+            border-radius: 18px;
+            margin-bottom: 22px;
+            background: linear-gradient(115deg, #4736a5, #235baf);
+            border: 1px solid #8170ff;
+        }
+
+        .welcome-banner h2 {
+            font-size: 22px;
+            margin-bottom: 9px;
+        }
+
+        .welcome-banner p {
+            color: #d7ddff;
+            font-size: 13px;
+        }
+
+        .section-heading {
+            margin: 25px 0 17px;
+        }
+
+        .section-heading h2 {
+            font-size: 21px;
+            margin-bottom: 7px;
+        }
+
+        .section-heading p {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .algorithm-form {
+            display: grid;
+            gap: 14px;
+            margin-top: 15px;
+        }
+
+        .algorithm-form label {
+            display: block;
+            font-size: 12px;
+            color: #bdc9df;
+            margin-bottom: 7px;
+        }
+
+        .algorithm-form input,
+        .algorithm-form select,
+        .algorithm-form textarea {
+            width: 100%;
+        }
+
+        .algorithm-form textarea {
+            min-height: 85px;
+            resize: vertical;
+        }
+
+        .result-box {
+            background: #0b1425;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 17px;
+            margin-top: 18px;
+            min-height: 65px;
+            overflow-wrap: anywhere;
+        }
+
+        .result-box pre {
+            white-space: pre-wrap;
+            color: #b9c8e3;
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        .status-dot {
+            display: inline-block;
+            height: 8px;
+            width: 8px;
+            background: #22c997;
+            border-radius: 50%;
+            margin-right: 7px;
+        }
+
+        .algorithm-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 15px;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .logout-form {
+            margin-top: 15px;
+        }
+
+        .logout-form button {
+            width: 100%;
+            text-align: left;
+            background: transparent;
+            color: #ff9aaa;
+            padding: 13px 14px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .logout-form button:hover {
+            background: #64263840;
+        }
+
+        .menu-overlay {
+            display: none;
+        }
+
+        /* PROFILE SIDEBAR LINK */
+
+        .profile-nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 13px 14px;
+            margin-top: 5px;
+            border-radius: 10px;
+            text-decoration: none;
+            color: #c3cce2;
+            font-size: 13px;
+            transition: .2s;
+        }
+
+        .profile-nav-link:hover {
+            background: #4736a533;
+            color: white;
+        }
+
+        .profile-nav-link .nav-icon {
+            font-size: 17px;
+        }
+
+        /* TOPBAR PROFILE */
+
+        .user-profile-link {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            text-decoration: none;
+            color: inherit;
+            padding: 7px 12px;
+            border-radius: 12px;
+            transition: .2s;
+        }
+
+        .user-profile-link:hover {
+            background: #8170ff20;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-email {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        .user-avatar {
+            width: 39px;
+            height: 39px;
+            min-width: 39px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #8155f5, #3479ed);
+            color: white;
+            font-weight: bold;
+        }
+
+        @media(max-width: 768px) {
+            .algorithm-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .menu-overlay.show {
+                display: block;
+                position: fixed;
+                inset: 0;
+                background: #0009;
+                z-index: 90;
+            }
+        }
+
+        @media(max-width: 480px) {
+            .user-email {
+                display: none;
+            }
+
+            .user-profile-link {
+                padding: 5px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="dashboard">
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar" id="sidebar">
+
+        <div class="sidebar-brand">
+            <div class="brand-logo">N</div>
+            <div>
+                <h2>OS NEXUS</h2>
+                <p>RESOURCE MANAGER</p>
+            </div>
+        </div>
+
+        <div class="sidebar-label">MAIN MENU</div>
+
+        <nav class="sidebar-nav">
+
+            <a href="#" class="active" data-section="overview">
+                <span>◈</span> Dashboard
+            </a>
+
+            <a href="#" data-section="cpu">
+                <span>▣</span> CPU Scheduling
+            </a>
+
+            <a href="#" data-section="memory">
+                <span>▤</span> Memory Management
+            </a>
+
+            <a href="#" data-section="deadlock">
+                <span>◇</span> Deadlock Detection
+            </a>
+
+            <a href="#" data-section="disk">
+                <span>◉</span> Disk Scheduling
+            </a>
+
+        </nav>
+
+        <!-- ACCOUNT MENU -->
+
+        <div class="sidebar-bottom">
+
+            <div class="sidebar-label">ACCOUNT</div>
+
+            <a href="{{ url_for('profile') }}" class="profile-nav-link">
+                <span class="nav-icon">👤</span>
+                <span>My Profile</span>
+            </a>
+
+            <form action="{{ url_for('logout') }}"
+                  method="POST"
+                  class="logout-form">
+
+                <button type="submit">↪ Logout</button>
+
+            </form>
+
+        </div>
+
+    </aside>
+
+    <div class="menu-overlay" id="menuOverlay"></div>
+
+    <!-- MAIN CONTENT -->
+
+    <main class="main-content">
+
+        <!-- TOPBAR -->
+
+        <header class="topbar">
+
+            <div style="display:flex; align-items:center; gap:13px;">
+
+                <button class="menu-toggle" id="menuToggle"
+                        aria-label="Open menu">
+                    ☰
+                </button>
+
+                <div>
+                    <h1 id="pageTitle">Dashboard</h1>
+                    <p>Operating System Resource Manager</p>
+                </div>
+
+            </div>
+
+            <!-- CLICKABLE USER PROFILE -->
+
+            <a href="{{ url_for('profile') }}"
+               class="user-profile-link">
+
+                <div class="user-profile">
+
+                    <div>
+                        <div class="user-name"
+                             style="font-size:13px;font-weight:700;">
+                            {{ user_name }}
+                        </div>
+
+                        <div class="user-email">
+                            {{ user_email }}
+                        </div>
+                    </div>
+
+                    <div class="user-avatar">
+                        {{ (user_name or 'U')[0]|upper }}
+                    </div>
+
+                </div>
+
+            </a>
+
+        </header>
+
+
+        <!-- DASHBOARD OVERVIEW -->
+
+        <section class="section active" id="overview">
+
+            <div class="welcome-banner">
+                <h2>Welcome to OS Nexus, {{ user_name }} 👋</h2>
+                <p>
+                    Monitor system resources and simulate operating
+                    system algorithms from one dashboard.
+                </p>
+            </div>
+
+            <div class="section-heading">
+                <h2>System Overview</h2>
+                <p>Real-time system resource monitoring</p>
+            </div>
+
+            <div class="stats-grid">
+
+                <div class="stat-card">
+                    <h3>CPU Usage</h3>
+                    <div class="stat-value" id="cpuUsage">--%</div>
+                    <div class="stat-label">Processor utilization</div>
+                </div>
+
+                <div class="stat-card">
+                    <h3>Memory Usage</h3>
+                    <div class="stat-value" id="memoryUsage">--%</div>
+                    <div class="stat-label">RAM utilization</div>
+                </div>
+
+                <div class="stat-card">
+                    <h3>Disk Usage</h3>
+                    <div class="stat-value" id="diskUsage">--%</div>
+                    <div class="stat-label">Storage utilization</div>
+                </div>
+
+                <div class="stat-card">
+                    <h3>CPU Cores</h3>
+                    <div class="stat-value" id="cpuCores">--</div>
+                    <div class="stat-label">Logical processors</div>
+                </div>
+
+            </div>
+
+            <div class="content-grid">
+
+                <div class="card">
+                    <h3>System Status</h3>
+                    <p>
+                        <span class="status-dot"></span>
+                        <span id="systemStatus">Checking system...</span>
+                    </p>
+
+                    <div class="metric-row">
+                        <span>Platform</span>
+                        <strong id="platform">--</strong>
+                    </div>
+
+                    <div class="metric-row">
+                        <span>Processor</span>
+                        <strong id="processor">--</strong>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>OS Nexus Modules</h3>
+
+                    <div class="metric-row">
+                        <span>CPU Scheduling</span>
+                        <strong>Available</strong>
+                    </div>
+
+                    <div class="metric-row">
+                        <span>Memory Management</span>
+                        <strong>Available</strong>
+                    </div>
+
+                    <div class="metric-row">
+                        <span>Banker's Algorithm</span>
+                        <strong>Available</strong>
+                    </div>
+
+                    <div class="metric-row">
+                        <span>Disk Scheduling</span>
+                        <strong>Available</strong>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- CPU SCHEDULING -->
+
+        <section class="section" id="cpu">
+
+            <div class="section-heading">
+                <h2>CPU Scheduling</h2>
+                <p>Simulate different CPU scheduling algorithms.</p>
+            </div>
+
+            <div class="algorithm-grid">
+
+                <div class="card">
+                    <h3>CPU Scheduling Simulator</h3>
+
+                    <form id="cpuForm" class="algorithm-form">
+
+                        <div>
+                            <label>Scheduling Algorithm</label>
+                            <select id="cpuAlgorithm" name="algorithm">
+                                <option value="FCFS">FCFS</option>
+                                <option value="SJF">SJF</option>
+                                <option value="Priority">Priority</option>
+                                <option value="Round Robin">Round Robin</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label>Arrival Times (comma separated)</label>
+                            <input id="arrivalTimes"
+                                   placeholder="0, 1, 2, 3"
+                                   required>
+                        </div>
+
+                        <div>
+                            <label>Burst Times (comma separated)</label>
+                            <input id="burstTimes"
+                                   placeholder="5, 3, 8, 6"
+                                   required>
+                        </div>
+
+                        <div>
+                            <label>Priority Values (optional)</label>
+                            <input id="priorities"
+                                   placeholder="2, 1, 3, 4">
+                        </div>
+
+                        <div>
+                            <label>Time Quantum (Round Robin)</label>
+                            <input id="timeQuantum"
+                                   type="number"
+                                   min="1"
+                                   value="2">
+                        </div>
+
+                        <button type="submit" class="primary-btn">
+                            Run CPU Scheduling
+                        </button>
+
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h3>Simulation Results</h3>
+                    <div class="result-box" id="cpuResult">
+                        <p>CPU scheduling results will appear here.</p>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- MEMORY MANAGEMENT -->
+
+        <section class="section" id="memory">
+
+            <div class="section-heading">
+                <h2>Memory Management</h2>
+                <p>Simulate memory allocation strategies.</p>
+            </div>
+
+            <div class="algorithm-grid">
+
+                <div class="card">
+                    <h3>Memory Allocation Simulator</h3>
+
+                    <form id="memoryForm" class="algorithm-form">
+
+                        <div>
+                            <label>Allocation Algorithm</label>
+                            <select id="memoryAlgorithm">
+                                <option value="First Fit">First Fit</option>
+                                <option value="Best Fit">Best Fit</option>
+                                <option value="Worst Fit">Worst Fit</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label>Memory Blocks</label>
+                            <input id="memoryBlocks"
+                                   placeholder="100, 500, 200, 300, 600"
+                                   required>
+                        </div>
+
+                        <div>
+                            <label>Process Sizes</label>
+                            <input id="processSizes"
+                                   placeholder="212, 417, 112, 426"
+                                   required>
+                        </div>
+
+                        <button type="submit" class="primary-btn">
+                            Run Memory Allocation
+                        </button>
+
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h3>Allocation Results</h3>
+                    <div class="result-box" id="memoryResult">
+                        <p>Memory allocation results will appear here.</p>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- DEADLOCK -->
+
+        <section class="section" id="deadlock">
+
+            <div class="section-heading">
+                <h2>Deadlock Detection</h2>
+                <p>Check system safety using Banker's Algorithm.</p>
+            </div>
+
+            <div class="algorithm-grid">
+
+                <div class="card">
+                    <h3>Banker's Algorithm Simulator</h3>
+
+                    <form id="deadlockForm" class="algorithm-form">
+
+                        <div>
+                            <label>Allocation Matrix</label>
+                            <textarea id="allocationMatrix"
+                                placeholder="0, 1, 0&#10;2, 0, 0&#10;3, 0, 2"
+                                required></textarea>
+                        </div>
+
+                        <div>
+                            <label>Maximum Matrix</label>
+                            <textarea id="maxMatrix"
+                                placeholder="7, 5, 3&#10;3, 2, 2&#10;9, 0, 2"
+                                required></textarea>
+                        </div>
+
+                        <div>
+                            <label>Available Resources</label>
+                            <input id="availableResources"
+                                   placeholder="3, 3, 2"
+                                   required>
+                        </div>
+
+                        <button type="submit" class="primary-btn">
+                            Check System Safety
+                        </button>
+
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h3>Safety Analysis</h3>
+                    <div class="result-box" id="deadlockResult">
+                        <p>Safety analysis will appear here.</p>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- DISK SCHEDULING -->
+
+        <section class="section" id="disk">
+
+            <div class="section-heading">
+                <h2>Disk Scheduling</h2>
+                <p>Analyze disk head movement and seek operations.</p>
+            </div>
+
+            <div class="algorithm-grid">
+
+                <div class="card">
+                    <h3>Disk Scheduling Simulator</h3>
+
+                    <form id="diskForm" class="algorithm-form">
+
+                        <div>
+                            <label>Disk Algorithm</label>
+                            <select id="diskAlgorithm">
+                                <option value="FCFS">FCFS</option>
+                                <option value="SSTF">SSTF</option>
+                                <option value="SCAN">SCAN</option>
+                                <option value="C-SCAN">C-SCAN</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label>Request Queue</label>
+                            <input id="requestQueue"
+                                   placeholder="98, 183, 37, 122, 14"
+                                   required>
+                        </div>
+
+                        <div>
+                            <label>Initial Head Position</label>
+                            <input id="headPosition"
+                                   type="number"
+                                   placeholder="53"
+                                   required>
+                        </div>
+
+                        <div>
+                            <label>Disk Size</label>
+                            <input id="diskSize"
+                                   type="number"
+                                   placeholder="200"
+                                   value="200">
+                        </div>
+
+                        <div>
+                            <label>Direction (SCAN / C-SCAN)</label>
+                            <select id="diskDirection">
+                                <option value="right">Right</option>
+                                <option value="left">Left</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="primary-btn">
+                            Run Disk Scheduling
+                        </button>
+
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h3>Disk Scheduling Results</h3>
+                    <div class="result-box" id="diskResult">
+                        <p>Disk scheduling results will appear here.</p>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+        <footer style="text-align:center;color:#64748b;font-size:11px;margin-top:35px;">
+            OS NEXUS © 2026 | Operating System Resource Manager
+        </footer>
+
+    </main>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+
+</body>
+</html>
