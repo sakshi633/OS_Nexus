@@ -49,6 +49,8 @@ def init_db():
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
+        
+        init_db()
 
 
 # ---------------- AUTHENTICATION ----------------
